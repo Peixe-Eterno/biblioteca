@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registro de Frequência</title>
+</head>
+<body>
+    <h1>Registro de Frequência</h1>
+    <form id="frequenciaForm">
+        <label for="nomeCompleto">Nome Completo:</label>
+        <input type="text" id="nomeCompleto" name="nomeCompleto" required><br><br>
+
+        <label for="identUser">Identificação do Usuário:</label>
+        <select id="identUser" name="identUser" required>
+            <option value="Tecnico em Logistica">Técnico em Logística</option>
+            <option value="Tecnico em desenvolvimento de sistemas">Técnico em Desenvolvimento de Sistemas</option>
+            <option value="Funcionário">Funcionário</option>
+            <option value="Estudante SESI">Estudante SESI</option>
+            <option value="Visitante">Visitante</option>
+        </select><br><br>
+
+        <button type="button" onclick="enviarDados()">Enviar</button>
+    </form>
+
+    <div id="resultado"></div>
+
+    <p><a href="tb_frequencia.html">Ver registros de frequência</a></p>
+
+    <script>
+        async function enviarDados() {
+            const nomeCompleto = document.getElementById('nomeCompleto').value;
+            const identUser = document.getElementById('identUser').value;
+
+            const response = await fetch('/registrar-frequencia', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ nomeCompleto, identUser })
+            });
+
+            const result = await response.json();
+            document.getElementById('resultado').innerText = result.message;
+        }
+    </script>
+</body>
+</html>
