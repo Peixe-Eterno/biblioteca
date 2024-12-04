@@ -7,15 +7,12 @@ document.addEventListener("DOMContentLoaded", () => {
   if (formulario) {
     formulario.addEventListener("submit", function(event) {
       event.preventDefault(); // Previne o envio padrão do formulário
-
-      // Chama a função 'salvar' (você pode definir esta função em algum lugar no seu código)
-      salvar(); 
+      salvar(); // Chama a função 'salvar'
     });
   } else {
     console.error("Form element not found");
   }
 
-  // Outras partes do seu código, como a manipulação de seleção de identificação, etc.
   let select = document.querySelector(".select"),
     selectedValue = document.getElementById("select-value"),
     optionsViewButton = document.getElementById("options-view-button"),
@@ -24,11 +21,7 @@ document.addEventListener("DOMContentLoaded", () => {
   // Ocultar/mostrar botão "Registrar" quando as opções estão abertas/fechadas
   optionsViewButton.addEventListener("input", () => {
     select.classList.toggle("open");
-
-    const input =
-      document.querySelector(".option input:checked") ||
-      document.querySelector(".option input");
-
+    const input = document.querySelector(".option input:checked") || document.querySelector(".option input");
     input.focus();
   });
 
@@ -36,10 +29,7 @@ document.addEventListener("DOMContentLoaded", () => {
   inputOptions.forEach((input) => {
     input.addEventListener("click", (event) => {
       selectedValue.textContent = input.dataset.label;
-
-      const isMouseOrTouch =
-        event.pointerType == "mouse" || event.pointerType == "touch";
-
+      const isMouseOrTouch = event.pointerType == "mouse" || event.pointerType == "touch";
       if (isMouseOrTouch) {
         optionsViewButton.click();
       }
@@ -49,15 +39,26 @@ document.addEventListener("DOMContentLoaded", () => {
   // Fechar as opções ao pressionar a tecla ESC ou espaço
   window.addEventListener("keydown", (e) => {
     if (!select.classList.contains("open")) return;
-
     if (e.key == "Escape" || e.key == " ") {
       optionsViewButton.click();
     }
   });
 
-  // Função para limpar o formulário (se necessário)
+  // Fechar as opções se clicar fora da área
+  document.addEventListener("click", (event) => {
+    if (!select.contains(event.target) && select.classList.contains("open")) {
+      optionsViewButton.click();
+    }
+  });
+
+  // **Alteração no evento de limpar o formulário**
+  const resetButton = document.getElementById("reset");
+  if (resetButton) {
+    resetButton.addEventListener("click", limparFormulario);
+  }
+
+  // Função para limpar o formulário
   function limparFormulario() {
-    // Limpar o formulário
     formulario.reset();
     // Limpar a seleção de rádio
     const radioButtons = document.querySelectorAll("input[type='radio']");
@@ -67,19 +68,19 @@ document.addEventListener("DOMContentLoaded", () => {
     // Resetar o texto de "Selecione sua identificação"
     document.getElementById("select-value").textContent = "Selecione sua identificação";
   }
-  
-  // Se necessário, adicionar lógica para salvar os dados do formulário (função 'salvar')
+
+  // Função para salvar os dados do formulário
   async function salvar() {
     const nomeCompleto = document.getElementById('nome').value;
-    const identUser = document.getElementById('select-value').value;
+    const identUser = document.getElementById('select-value').textContent;  // Mudado para pegar o texto do selecionado
 
     const response = await fetch('/registrar-frequencia', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ nomeCompleto, identUser })
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ nomeCompleto, identUser })
     });
 
     const result = await response.json();
     document.getElementById('resultado').innerText = result.message;
-}
+  }
 });

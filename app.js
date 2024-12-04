@@ -25,7 +25,7 @@ const config = {
     }
 };
 
-// Função para gerenciar a conexão do banco
+// Função para gerenciar a conexão com o banco
 async function connectToDatabase() {
     try {
         if (!sql.pool) {
@@ -55,11 +55,25 @@ app.post('/registrar-frequencia', async (req, res) => {
 
 // Rota para buscar os dados da tabela `frequencia`
 app.get('/api/frequencia', async (req, res) => {
+    const { startDate, endDate, date } = req.query; // Recebe parâmetros de data
+
     try {
         await connectToDatabase();
 
-        // Consulta para obter todos os registros
-        const result = await sql.query`SELECT * FROM frequencia ORDER BY DataHoraMomento DESC`;
+        let query = 'SELECT * FROM frequencia';
+
+        // Se startDate e endDate forem fornecidos, filtra pelos registros entre essas datas
+        if (startDate && endDate) {
+            query += ` WHERE DataHoraMomento BETWEEN '${startDate}' AND '${endDate}'`;
+        } else if (date) {
+            // Se apenas uma data for fornecida, filtra os registros dessa data
+            query += ` WHERE CAST(DataHoraMomento AS DATE) = '${date}'`;
+        }
+
+        query += ' ORDER BY DataHoraMomento DESC'; // Ordena pela data
+
+        // Executa a consulta no banco
+        const result = await sql.query(query);
         res.json(result.recordset);
     } catch (error) {
         console.error('Erro ao buscar dados:', error);
